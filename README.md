@@ -42,4 +42,8 @@ Towards Data Science - The Monte Carlo Simulation: A Practical Guide: <https://t
 
 Scikit-learn Official Documentation - Ensemble methods: <https://scikit-learn.org/stable/modules/ensemble.html>
 TensorFlow Official Documentation - LSTMs: <https://www.tensorflow.org/guide/keras/rnn#lstms_and_grus>
-(Always cite the official documentation for the tools you used. It is the most direct and professional reference.)```
+(Always cite the official documentation for the tools you used. It is the most direct and professional reference.)
+The Haversine Formula: <https://www.movable-type.co.uk/scripts/latlong.html>
+Geopy Library: <https://geopy.readthedocs.io/>
+Extreme Gradient Boosting (XGBoost): <https://xgboost.readthedocs.io/>
+Data Preprocessing (Feature Scaling): <https://scikit-learn.org/stable/modules/generated/sklearn.preprocessing.StandardScaler.html>
