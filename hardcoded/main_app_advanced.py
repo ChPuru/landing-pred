@@ -17,7 +17,7 @@ def run_advanced_ground_station():
         try:
             telemetry_packet = json.loads(telemetry_string)
             
-            if telemetry_packet['vel_v'] < 0: # Only predict when descending
+            if telemetry_packet['vel_v'] < 0:
                 
                 # --- Run the full forward simulation ---
                 prediction = run_forward_simulation(
