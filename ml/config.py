@@ -44,3 +44,10 @@ TRAINING = {
     "lstm_sequence_length": 30,
     "random_state": 42
 }
+
+SIMULATION_SETTINGS = SIMULATION
+FLIGHT_LOG_FILENAME = PATHS["raw_dataset"]
+
+# Add paths for new models
+PATHS["bayesian_meta_model"] = "bayesian_meta_model.pkl"
+PATHS["wind_estimator"] = "wind_estimator.pkl"
