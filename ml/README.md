@@ -1,4 +1,4 @@
-# Project 6: The Professional-Grade Ensemble Predictor
+# Project 2: The Professional-Grade Ensemble Predictor
 
 This is our most advanced and intelligent landing prediction system. It represents the final evolution of our work, combining the best of physics, data science, and multiple AI models to achieve the highest possible accuracy and robustness.
 
