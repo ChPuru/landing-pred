@@ -20,6 +20,11 @@ def run_ultimate_predictor():
         xgb_model = joblib.load(PATHS['xgboost_model'])
         lstm_model = load_model(PATHS['lstm_model'], compile=False)
         meta_model = joblib.load(PATHS['meta_model'])
+        
+        # Get the feature names for both the base and meta models
+        base_model_features = xgb_model.feature_names_in_
+        meta_model_features = meta_model.feature_names_in_
+        
         logging.info("All models and scaler loaded successfully.")
     except Exception as e:
         logging.error(f"FATAL ERROR loading models: {e}. Please run data_preparation.py and train_ensemble.py first.")
@@ -35,34 +40,35 @@ def run_ultimate_predictor():
             
             if telemetry_packet.get('vel_v', 0) < 0 and len(history) == TRAINING['lstm_sequence_length']:
                 # --- 1. Prepare Live Data ---
-                # Create a DataFrame for the single, most recent data point for XGBoost
                 live_df = pd.DataFrame([telemetry_packet])
-                live_df_scaled = scaler.transform(live_df[TRAINING['features']])
+                live_df_scaled = scaler.transform(live_df[base_model_features])
                 
-                # Create a DataFrame for the full history for the LSTM
                 history_df = pd.DataFrame(list(history))
-                history_df_scaled = scaler.transform(history_df[TRAINING['features']])
+                history_df_scaled = scaler.transform(history_df[base_model_features])
 
                 # --- 2. Base Ensemble Predictions ---
                 phys_pred = run_forward_simulation(telemetry_packet, CANSAT_PHYSICS, WIND_LAYERS, SIMULATION['physics_timestep_s'], SIMULATION['oscillation_mps'])
-                
-                # The XGBoost model expects a DataFrame, but we can use the scaled numpy array
                 xgb_pred = xgb_model.predict(live_df_scaled)[0]
                 
-                # --- THIS IS THE CORRECTED LINE ---
-                # history_df_scaled is already a NumPy array, so we remove .values
-                lstm_input = history_df_scaled.reshape(1, TRAINING['lstm_sequence_length'], len(TRAINING['features']))
+                lstm_input = history_df_scaled.reshape(1, TRAINING['lstm_sequence_length'], len(base_model_features))
                 lstm_pred = lstm_model.predict(lstm_input, verbose=0)[0]
 
                 # --- 3. Meta-Model Fusion ---
                 if phys_pred:
-                    meta_input = np.array([
-                        phys_pred['pred_lat'], phys_pred['pred_lon'],
-                        xgb_pred[0], xgb_pred[1],
-                        lstm_pred[0], lstm_pred[1]
-                    ]).reshape(1, -1)
+                    # --- THIS IS THE FINAL FIX ---
+                    # Create a pandas DataFrame for the meta-model's input,
+                    # ensuring the column names are correct.
+                    meta_input_df = pd.DataFrame(
+                        [[
+                            phys_pred['pred_lat'], phys_pred['pred_lon'],
+                            xgb_pred[0], xgb_pred[1],
+                            lstm_pred[0], lstm_pred[1]
+                        ]],
+                        columns=meta_model_features
+                    )
                     
-                    fused_pred = meta_model.predict(meta_input)[0]
+                    # The warning will now be gone.
+                    fused_pred = meta_model.predict(meta_input_df)[0]
                     
                     # --- 4. Display ---
                     logging.info(f"Altitude: {telemetry_packet['alt']:.1f}m | Fused Prediction: Lat={fused_pred[0]:.4f}, Lon={fused_pred[1]:.4f}")

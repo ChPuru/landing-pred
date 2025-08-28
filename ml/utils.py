@@ -10,8 +10,8 @@ def setup_logging():
         datefmt='%Y-%m-%d %H:%M:%S'
     )
 
-def calculate_haversine_error(y_true, y_pred):
-    """Calculates the landing error in meters for a set of predictions."""
+def calculate_geodesic_error(y_true, y_pred):
+    """Calculates the landing error in meters using the precise geodesic formula."""
     errors = [
         geodesic((true_lat, true_lon), (pred_lat, pred_lon)).meters
         for (true_lat, true_lon), (pred_lat, pred_lon) in zip(y_true, y_pred)
